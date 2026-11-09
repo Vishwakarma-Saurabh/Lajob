@@ -12,6 +12,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY vendor/en_core_web_sm-3.7.1-py3-none-any.whl /tmp/
+RUN pip install --no-cache-dir /tmp/en_core_web_sm-3.7.1-py3-none-any.whl && \
+    rm /tmp/en_core_web_sm-3.7.1-py3-none-any.whl
+
 COPY . .
 
 RUN mkdir -p /app/uploads
