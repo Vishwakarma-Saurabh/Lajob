@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import resumes
-from app.api import auth
+from app.api import auth, resumes, jobs, applications
 from app.config import settings
 
 app = FastAPI(title="Resume SaaS API", version="0.1.0")
@@ -17,6 +16,8 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(resumes.router)
+app.include_router(jobs.router)
+app.include_router(applications.router)
 
 
 @app.get("/health")
