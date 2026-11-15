@@ -5,7 +5,7 @@ from app.models.job import Job
 
 
 def fetch_naukri_jobs(db: Session, search_term: str, city: str | None = None, results_wanted: int = 20,) -> list[Job]:
-    raw_jobs = scrape_jobs(
+    result = scrape_jobs(
         search_term=search_term,
         sources=["naukri"],
         city=city,
@@ -13,7 +13,7 @@ def fetch_naukri_jobs(db: Session, search_term: str, city: str | None = None, re
     )
 
     inserted = []
-    for raw in raw_jobs:
+    for raw in result.jobs:
         import hashlib
         ext_id = f"naukri_{hashlib.md5(raw.job_url.encode()).hexdigest()[:12]}"
 

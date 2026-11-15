@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-bookworm
 
 WORKDIR /app
 
@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir --default-timeout=1000 -r requirements.txt
+RUN playwright install --with-deps chromium
 
 COPY vendor/en_core_web_sm-3.7.1-py3-none-any.whl /tmp/
 RUN pip install --no-cache-dir /tmp/en_core_web_sm-3.7.1-py3-none-any.whl && \

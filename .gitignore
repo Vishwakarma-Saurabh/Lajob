@@ -25,4 +25,8 @@ backend/uploads/
 
 # spaCy models
 en_core_web_sm*/
-*.whl   
+*.whl
+
+/backend/.jobhunter_cache
+browser_sessions/*.json
+uploads/screenshots/

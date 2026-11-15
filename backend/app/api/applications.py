@@ -8,6 +8,8 @@ from app.database import get_db
 from app.models.application import Application
 from app.models.job import Job
 from app.models.user import User
+from app.workers.browser_tasks import fill_application, submit_application
+from app.services.browser_session import has_session
 
 router = APIRouter(prefix="/applications", tags=["applications"])
 
@@ -104,6 +106,40 @@ def update_application(
     db.refresh(app)
     job = db.get(Job, app.job_id)
     return _to_out(app, job)
+
+
+@router.post("/{app_id}/prepare-auto-apply")
+def prepare_auto_apply(
+    app_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    app = db.get(Application, app_id)
+    if not app or app.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    if not has_session(current_user.id, "naukri"):
+        raise HTTPException(
+            status_code=400,
+            detail="No Naukri session. Run scripts/connect_naukri.py on the host first.",
+        )
+
+    fill_application.delay(current_user.id, app.job_id)
+    return {"status": "queued", "message": "Form filling started. Check back in ~30 seconds."}
+
+
+@router.post("/{app_id}/approve-submit")
+def approve_submit(
+    app_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    app = db.get(Application, app_id)
+    if not app or app.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    submit_application.delay(current_user.id, app.job_id)
+    return {"status": "queued", "message": "Submission queued."}
 
 
 def _to_out(app: Application, job: Job | None) -> ApplicationOut:

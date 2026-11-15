@@ -63,10 +63,13 @@ export default function Dashboard({ user }: { user: User }) {
         `${API_BASE}/jobs/fetch?search_term=${encodeURIComponent(searchTerm)}&limit=20`,
         { method: "POST", credentials: "include" }
       );
-      const body = await res.json();
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(body.detail || `Fetch failed (${res.status})`);
+      }
       setFetchStatus(`Fetched ${body.fetched} new jobs.`);
-    } catch {
-      setFetchStatus("Fetch failed.");
+    } catch (err) {
+      setFetchStatus((err as Error).message);
     }
   };
 
